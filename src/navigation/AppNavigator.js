@@ -5,6 +5,7 @@ import { useAuth } from '../context/AuthContext';
 import LoginScreen from '../screens/LoginScreen';
 import RegisterScreen from '../screens/RegisterScreen';
 import PlaylistsScreen from '../screens/PlaylistsScreen';
+import HomeScreen from '../screens/HomeScreen';
 import PlaylistDetailScreen from '../screens/PlaylistDetailScreen';
 import AddMovieScreen from '../screens/AddMovieScreen';
 import EditMovieScreen from '../screens/EditMovieScreen';
@@ -22,7 +23,8 @@ const AuthNavigator = () => (
 );
 
 const AppNavigator = () => (
-  <AppStack.Navigator 
+  <AppStack.Navigator
+    initialRouteName="Home"
     screenOptions={{
       headerStyle: {
         backgroundColor: COLORS.BACKGROUND_DARK,
@@ -33,6 +35,11 @@ const AppNavigator = () => (
       },
     }}
   >
+    <AppStack.Screen
+      name="Home"
+      component={HomeScreen}
+      options={{ headerShown: false }}
+    />
     <AppStack.Screen 
       name="Playlists" 
       component={PlaylistsScreen}

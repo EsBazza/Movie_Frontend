@@ -159,17 +159,26 @@ export const apiEndpoints = {
     delete: (id) => api.delete(`/api/movies/${id}/`),
     
     // Get or create movie from TMDB ID (lazy loading)
-    getOrCreate: (tmdbId) => 
-      api.post('/api/movies/get_or_create/', { tmdb_id: tmdbId }),
+    getOrCreate: (tmdbId, mediaType = 'movie') => 
+      api.post('/api/movies/get_or_create/', { tmdb_id: tmdbId, media_type: mediaType }),
   },
 
   // === TMDB PROXY ===
   tmdb: {
-    search: (query, page = 1) => 
-      api.get('/api/tmdb/search/', { params: { query, page } }),
+    search: (query, page = 1, type = 'movie') => 
+      api.get('/api/tmdb/search/', { params: { query, page, type } }),
     
     getMovieDetails: (tmdbId) => 
       api.get(`/api/tmdb/movies/${tmdbId}/`),
+
+    getTVDetails: (tmdbId) =>
+      api.get(`/api/tmdb/tv/${tmdbId}/`),
+
+    getTVSeason: (tmdbId, seasonNumber) =>
+      api.get(`/api/tmdb/tv/${tmdbId}/seasons/${seasonNumber}/`),
+
+    getPopular: (type = 'movie', page = 1) =>
+      api.get('/api/tmdb/popular/', { params: { type, page } }),
   },
 };
 

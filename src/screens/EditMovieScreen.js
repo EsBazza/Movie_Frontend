@@ -13,8 +13,8 @@ import {
 } from 'react-native';
 import { Picker } from '@react-native-picker/picker';
 import axios from 'axios';
-import { useAuth } from '../context/AuthContext';
-import { API_PLAYLISTS, API_BASE_URL, COLORS, STATUS_CHOICES } from '../constants/Constants';
+import { API_BASE_URL, COLORS, STATUS_CHOICES } from '../constants/Constants';
+import { apiEndpoints } from '../services/api';
 
 const AddMovieScreen = ({ route, navigation }) => {
   const { playlist } = route.params;
@@ -22,13 +22,6 @@ const AddMovieScreen = ({ route, navigation }) => {
   const [searchResults, setSearchResults] = useState([]);
   const [selectedStatus, setSelectedStatus] = useState('to_watch');
   const [searching, setSearching] = useState(false);
-  const { userToken } = useAuth();
-
-  const authConfig = {
-    headers: {
-      'Authorization': `Bearer ${userToken}`,
-    },
-  };
 
   const searchMovies = async () => {
     if (!searchQuery.trim()) {
@@ -40,8 +33,8 @@ const AddMovieScreen = ({ route, navigation }) => {
     try {
       // Search for movies using TMDB API through your backend
       const response = await axios.get(
-        `${API_BASE_URL}/api/tmdb/search/?query=${encodeURIComponent(searchQuery)}`,
-        authConfig
+        `${API_BASE_URL}/api/tmdb/search/`,
+        { params: { query: searchQuery } }
       );
       setSearchResults(response.data.results || []);
     } catch (error) {
@@ -55,23 +48,12 @@ const AddMovieScreen = ({ route, navigation }) => {
   const handleAddMovie = async (tmdbId, movieTitle) => {
     try {
       // First, get or create the movie from TMDB
-      const movieResponse = await axios.post(
-        `${API_BASE_URL}/api/movies/get_or_create/`,
-        { tmdb_id: tmdbId },
-        authConfig
-      );
+      const movieResponse = await apiEndpoints.movies.getOrCreate(tmdbId);
 
       const movieId = movieResponse.data.id;
 
       // Then add to playlist
-      await axios.post(
-        `${API_PLAYLISTS}${playlist.id}/add_movie/`,
-        { 
-          movie_id: movieId,
-          status: selectedStatus
-        },
-        authConfig
-      );
+      await apiEndpoints.playlists.addMovie(playlist.id, movieId, selectedStatus);
 
       Alert.alert("Success", `${movieTitle} added to playlist!`);
       navigation.goBack();

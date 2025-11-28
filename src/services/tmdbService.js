@@ -15,9 +15,9 @@ class TMDBService {
    * @param {number} page - Page number (default: 1)
    * @returns {Promise<{success: boolean, data: object|null, error: string|null}>}
    */
-  async searchMovies(query, page = 1) {
+  async searchMovies(query, page = 1, type = 'movie') {
     try {
-      const response = await apiEndpoints.tmdb.search(query, page);
+      const response = await apiEndpoints.tmdb.search(query, page, type);
       return {
         success: true,
         data: response.data,
@@ -57,14 +57,78 @@ class TMDBService {
   }
 
   /**
+   * Get detailed TV show info including season metadata
+   */
+  async getTVDetails(tmdbId) {
+    try {
+      const response = await apiEndpoints.tmdb.getTVDetails(tmdbId);
+      return {
+        success: true,
+        data: response.data,
+        error: null,
+      };
+    } catch (error) {
+      console.error('TMDB TV Details Error:', error);
+      return {
+        success: false,
+        data: null,
+        error: this.handleError(error),
+      };
+    }
+  }
+
+  /**
+   * Get episodes list for a season
+   */
+  async getTVSeason(tmdbId, seasonNumber) {
+    try {
+      const response = await apiEndpoints.tmdb.getTVSeason(tmdbId, seasonNumber);
+      return {
+        success: true,
+        data: response.data,
+        error: null,
+      };
+    } catch (error) {
+      console.error('TMDB TV Season Error:', error);
+
+      return {
+        success: false,
+        data: null,
+        error: this.handleError(error),
+      };
+    }
+  }
+
+  /**
+   * Get TMDB popular titles
+   */
+  async getPopular(type = 'movie', page = 1) {
+    try {
+      const response = await apiEndpoints.tmdb.getPopular(type, page);
+      return {
+        success: true,
+        data: response.data,
+        error: null,
+      };
+    } catch (error) {
+      console.error('TMDB Popular Error:', error);
+      return {
+        success: false,
+        data: null,
+        error: this.handleError(error),
+      };
+    }
+  }
+
+  /**
    * Get or create movie in local database from TMDB ID
    * This implements the "lazy loading" pattern - fetch from TMDB only when needed
    * @param {number} tmdbId - TMDB movie ID
    * @returns {Promise<{success: boolean, data: object|null, error: string|null}>}
    */
-  async getOrCreateMovie(tmdbId) {
+  async getOrCreateMovie(tmdbId, mediaType = 'movie') {
     try {
-      const response = await apiEndpoints.movies.getOrCreate(tmdbId);
+      const response = await apiEndpoints.movies.getOrCreate(tmdbId, mediaType);
       return {
         success: true,
         data: response.data,
@@ -116,18 +180,25 @@ class TMDBService {
    * @returns {Object} - Formatted movie data
    */
   formatMovieData(movie) {
+    const mediaType = movie.media_type || (movie.first_air_date ? 'tv' : 'movie');
+    const title = mediaType === 'tv'
+      ? movie.name || movie.original_name || movie.title
+      : movie.title || movie.original_title || movie.name;
+    const releaseDate = mediaType === 'tv' ? movie.first_air_date : movie.release_date;
+
     return {
       id: movie.id,
-      title: movie.title,
+      media_type: mediaType,
+      title,
       poster_path: movie.poster_path,
       backdrop_path: movie.backdrop_path,
       overview: movie.overview,
-      release_date: movie.release_date,
+      release_date: releaseDate,
       vote_average: movie.vote_average,
       vote_count: movie.vote_count,
       genre_ids: movie.genre_ids,
       // Formatted fields
-      release_year: movie.release_date ? new Date(movie.release_date).getFullYear() : null,
+      release_year: releaseDate ? new Date(releaseDate).getFullYear() : null,
       poster_url: movie.poster_path 
         ? `${TMDB_IMAGE_BASE}${movie.poster_path}`
         : null,

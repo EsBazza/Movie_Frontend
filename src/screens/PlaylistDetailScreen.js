@@ -14,10 +14,11 @@ import {
   ScrollView,
   Linking
 } from 'react-native';
-import { WebView } from 'react-native-webview';
+import YoutubePlayer from 'react-native-youtube-iframe';
 import { useFocusEffect } from '@react-navigation/native';
 import { useAuth } from '../context/AuthContext';
 import { apiEndpoints } from '../services/api';
+import tmdbService from '../services/tmdbService';
 import { COLORS, STATUS_CHOICES, getStatusByValue } from '../constants/Constants';
 
 const { width, height } = Dimensions.get('window');
@@ -32,7 +33,20 @@ const PlaylistDetailScreen = ({ route, navigation }) => {
   const [selectedMovie, setSelectedMovie] = useState(null);
   const [selectedMovieForDetail, setSelectedMovieForDetail] = useState(null);
   const [showTrailer, setShowTrailer] = useState(false);
+  const [isTrailerPlaying, setIsTrailerPlaying] = useState(false);
+  const [tvSeasons, setTvSeasons] = useState([]);
+  const [seasonsLoading, setSeasonsLoading] = useState(false);
+  const [episodesLoading, setEpisodesLoading] = useState(false);
+  const [selectedSeasonNumber, setSelectedSeasonNumber] = useState(null);
+  const [seasonEpisodes, setSeasonEpisodes] = useState([]);
   const { signOut } = useAuth();
+
+  const closeDetailModal = () => {
+    setMovieDetailModalVisible(false);
+    setShowTrailer(false);
+    setIsTrailerPlaying(false);
+    resetTVShowState();
+  };
 
   const fetchPlaylistItems = async () => {
     setLoading(true);
@@ -93,9 +107,58 @@ const PlaylistDetailScreen = ({ route, navigation }) => {
     );
   };
 
+  const resetTVShowState = () => {
+    setTvSeasons([]);
+    setSeasonEpisodes([]);
+    setSelectedSeasonNumber(null);
+    setSeasonsLoading(false);
+    setEpisodesLoading(false);
+  };
+
+  const handleSelectSeason = async (tmdbId, seasonNumber) => {
+    setSelectedSeasonNumber(seasonNumber);
+    setEpisodesLoading(true);
+    try {
+      const result = await tmdbService.getTVSeason(tmdbId, seasonNumber);
+      if (result.success) {
+        setSeasonEpisodes(result.data?.episodes || []);
+      } else {
+        Alert.alert('Season Details', result.error || 'Unable to load episodes.');
+      }
+    } finally {
+      setEpisodesLoading(false);
+    }
+  };
+
+  const loadTVSeasons = async (tmdbId) => {
+    if (!tmdbId) return;
+    setSeasonsLoading(true);
+    try {
+      const result = await tmdbService.getTVDetails(tmdbId);
+      if (result.success) {
+        const seasons = (result.data?.seasons || []).filter((season) => season.season_number !== 0);
+        setTvSeasons(seasons);
+        if (seasons.length) {
+          handleSelectSeason(tmdbId, seasons[0].season_number);
+        } else {
+          setSeasonEpisodes([]);
+        }
+      } else {
+        Alert.alert('TV Details', result.error || 'Unable to load seasons.');
+      }
+    } finally {
+      setSeasonsLoading(false);
+    }
+  };
+
   const openMovieDetail = (item) => {
     setSelectedMovieForDetail(item);
     setShowTrailer(false);
+    setIsTrailerPlaying(false);
+    resetTVShowState();
+    if (item.movie.media_type === 'tv' && item.movie.tmdb_id) {
+      loadTVSeasons(item.movie.tmdb_id);
+    }
     setMovieDetailModalVisible(true);
   };
 
@@ -328,20 +391,14 @@ const PlaylistDetailScreen = ({ route, navigation }) => {
         animationType="slide"
         transparent={true}
         visible={movieDetailModalVisible}
-        onRequestClose={() => {
-          setMovieDetailModalVisible(false);
-          setShowTrailer(false);
-        }}
+        onRequestClose={closeDetailModal}
       >
         <View style={styles.detailModalOverlay}>
           <View style={styles.detailModalContent}>
             {/* Close Button */}
             <TouchableOpacity 
               style={styles.closeButton}
-              onPress={() => {
-                setMovieDetailModalVisible(false);
-                setShowTrailer(false);
-              }}
+              onPress={closeDetailModal}
             >
               <Text style={styles.closeButtonText}>✕</Text>
             </TouchableOpacity>
@@ -351,18 +408,22 @@ const PlaylistDetailScreen = ({ route, navigation }) => {
                 {/* Poster / Trailer Section */}
                 {showTrailer && selectedMovieForDetail.movie.youtube_id ? (
                   <View style={styles.trailerContainer}>
-                    <WebView
-                      style={styles.trailerWebView}
-                      source={{ 
-                        uri: `https://www.youtube.com/embed/${selectedMovieForDetail.movie.youtube_id}?autoplay=1&rel=0&modestbranding=1` 
+                    <YoutubePlayer
+                      height={220}
+                      play={isTrailerPlaying}
+                      videoId={selectedMovieForDetail.movie.youtube_id}
+                      onChangeState={(event) => {
+                        if (event === 'ended') {
+                          setIsTrailerPlaying(false);
+                        }
                       }}
-                      allowsFullscreenVideo={true}
-                      javaScriptEnabled={true}
-                      domStorageEnabled={true}
                     />
                     <TouchableOpacity 
                       style={styles.hideTrailerButton}
-                      onPress={() => setShowTrailer(false)}
+                      onPress={() => {
+                        setShowTrailer(false);
+                        setIsTrailerPlaying(false);
+                      }}
                     >
                       <Text style={styles.hideTrailerText}>Hide Trailer</Text>
                     </TouchableOpacity>
@@ -385,7 +446,10 @@ const PlaylistDetailScreen = ({ route, navigation }) => {
                     {selectedMovieForDetail.movie.youtube_id && (
                       <TouchableOpacity 
                         style={styles.playTrailerButton}
-                        onPress={() => setShowTrailer(true)}
+                        onPress={() => {
+                          setShowTrailer(true);
+                          setIsTrailerPlaying(true);
+                        }}
                       >
                         <Text style={styles.playButtonIcon}>▶</Text>
                         <Text style={styles.playButtonText}>Watch Trailer</Text>
@@ -427,12 +491,87 @@ const PlaylistDetailScreen = ({ route, navigation }) => {
                     </View>
                   )}
 
+                  {selectedMovieForDetail.movie.media_type === 'tv' && (
+                    <>
+                      <View style={styles.seasonSection}>
+                        <View style={styles.sectionHeader}>
+                          <Text style={styles.sectionLabel}>Seasons</Text>
+                          {seasonsLoading && (
+                            <ActivityIndicator size="small" color={COLORS.PRIMARY_ACCENT} />
+                          )}
+                        </View>
+                        {tvSeasons.length ? (
+                          <ScrollView horizontal showsHorizontalScrollIndicator={false}>
+                            <View style={styles.seasonChipsRow}>
+                              {tvSeasons.map((season) => {
+                                const isActive = selectedSeasonNumber === season.season_number;
+                                return (
+                                  <TouchableOpacity
+                                    key={season.id || season.season_number}
+                                    style={[styles.seasonChip, isActive && styles.seasonChipActive]}
+                                    onPress={() => handleSelectSeason(selectedMovieForDetail.movie.tmdb_id, season.season_number)}
+                                  >
+                                    <Text style={[styles.seasonChipLabel, isActive && styles.seasonChipLabelActive]}>
+                                      Season {season.season_number}
+                                    </Text>
+                                    <Text style={[styles.seasonChipMeta, isActive && styles.seasonChipMetaActive]}>
+                                      {season.episode_count} eps
+                                    </Text>
+                                  </TouchableOpacity>
+                                );
+                              })}
+                            </View>
+                          </ScrollView>
+                        ) : (
+                          !seasonsLoading && (
+                            <Text style={styles.emptySeasonsText}>Seasons unavailable for this title.</Text>
+                          )
+                        )}
+                      </View>
+
+                      {selectedSeasonNumber && (
+                        <View style={styles.episodesSection}>
+                          <View style={styles.sectionHeader}>
+                            <Text style={styles.sectionLabel}>Episodes · Season {selectedSeasonNumber}</Text>
+                            {episodesLoading && (
+                              <ActivityIndicator size="small" color={COLORS.PRIMARY_ACCENT} />
+                            )}
+                          </View>
+                          {seasonEpisodes.length ? (
+                            seasonEpisodes.map((episode) => (
+                              <View key={episode.id || episode.episode_number} style={styles.episodeCard}>
+                                <View style={styles.episodeNumberBadge}>
+                                  <Text style={styles.episodeNumberText}>{episode.episode_number}</Text>
+                                </View>
+                                <View style={styles.episodeContent}>
+                                  <Text style={styles.episodeTitle}>{episode.name || `Episode ${episode.episode_number}`}</Text>
+                                  <Text style={styles.episodeMeta}>
+                                    {episode.air_date || 'TBA'} · {episode.runtime ? `${episode.runtime}m` : 'Runtime TBA'}
+                                  </Text>
+                                  {episode.overview ? (
+                                    <Text style={styles.episodeOverview} numberOfLines={3}>
+                                      {episode.overview}
+                                    </Text>
+                                  ) : null}
+                                </View>
+                              </View>
+                            ))
+                          ) : (
+                            !episodesLoading && (
+                              <Text style={styles.emptyEpisodesText}>Select a season to view episodes.</Text>
+                            )
+                          )}
+                        </View>
+                      )}
+                    </>
+                  )}
+
                   {/* Action Buttons */}
                   <View style={styles.detailActions}>
                     <TouchableOpacity 
                       style={styles.detailActionButton}
                       onPress={() => {
-                        setMovieDetailModalVisible(false);
+                        closeDetailModal();
                         setSelectedMovie(selectedMovieForDetail);
                         setTimeout(() => setStatusModalVisible(true), 300);
                       }}
@@ -456,7 +595,7 @@ const PlaylistDetailScreen = ({ route, navigation }) => {
                     <TouchableOpacity 
                       style={[styles.detailActionButton, styles.removeActionButton]}
                       onPress={() => {
-                        setMovieDetailModalVisible(false);
+                        closeDetailModal();
                         handleRemoveMovie(selectedMovieForDetail.movie.id, selectedMovieForDetail.movie.title);
                       }}
                     >
@@ -912,10 +1051,101 @@ const styles = StyleSheet.create({
     color: COLORS.TEXT_LIGHT,
     marginBottom: 10,
   },
+  sectionHeader: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    marginBottom: 10,
+  },
   descriptionText: {
     fontSize: 15,
     lineHeight: 24,
     color: COLORS.TEXT_MUTED,
+  },
+  seasonSection: {
+    marginBottom: 20,
+  },
+  seasonChipsRow: {
+    flexDirection: 'row',
+    gap: 10,
+  },
+  seasonChip: {
+    minWidth: 120,
+    backgroundColor: COLORS.CARD_DARK,
+    borderRadius: 12,
+    paddingVertical: 12,
+    paddingHorizontal: 16,
+    marginRight: 10,
+    borderWidth: 1,
+    borderColor: COLORS.CARD_DARK,
+  },
+  seasonChipActive: {
+    borderColor: COLORS.PRIMARY_ACCENT,
+    backgroundColor: COLORS.PRIMARY_ACCENT + '15',
+  },
+  seasonChipLabel: {
+    color: COLORS.TEXT_LIGHT,
+    fontWeight: '600',
+  },
+  seasonChipLabelActive: {
+    color: COLORS.PRIMARY_ACCENT,
+  },
+  seasonChipMeta: {
+    marginTop: 4,
+    color: COLORS.TEXT_MUTED,
+    fontSize: 12,
+  },
+  seasonChipMetaActive: {
+    color: COLORS.TEXT_LIGHT,
+  },
+  emptySeasonsText: {
+    color: COLORS.TEXT_MUTED,
+    fontSize: 13,
+  },
+  episodesSection: {
+    marginBottom: 24,
+  },
+  episodeCard: {
+    flexDirection: 'row',
+    backgroundColor: COLORS.CARD_DARK,
+    borderRadius: 12,
+    padding: 12,
+    marginBottom: 10,
+    gap: 12,
+  },
+  episodeNumberBadge: {
+    width: 32,
+    height: 32,
+    borderRadius: 16,
+    backgroundColor: COLORS.PRIMARY_ACCENT + '20',
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  episodeNumberText: {
+    color: COLORS.PRIMARY_ACCENT,
+    fontWeight: 'bold',
+  },
+  episodeContent: {
+    flex: 1,
+  },
+  episodeTitle: {
+    color: COLORS.TEXT_LIGHT,
+    fontWeight: '600',
+    fontSize: 15,
+  },
+  episodeMeta: {
+    color: COLORS.TEXT_MUTED,
+    fontSize: 12,
+    marginVertical: 4,
+  },
+  episodeOverview: {
+    color: COLORS.TEXT_MUTED,
+    fontSize: 12,
+    lineHeight: 18,
+  },
+  emptyEpisodesText: {
+    color: COLORS.TEXT_MUTED,
+    fontSize: 13,
   },
 
   // Detail Actions
