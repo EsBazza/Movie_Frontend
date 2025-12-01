@@ -12,63 +12,67 @@ import EditMovieScreen from '../screens/EditMovieScreen';
 import { COLORS } from '../constants/Constants';
 
 const Stack = createStackNavigator();
-const AuthStack = createStackNavigator();
-const AppStack = createStackNavigator();
-
-const AuthNavigator = () => (
-  <AuthStack.Navigator screenOptions={{ headerShown: false }}>
-  <AuthStack.Screen name="Login" component={LoginScreen} />
-  <AuthStack.Screen name="Register" component={RegisterScreen} />
-  </AuthStack.Navigator>
-);
-
-const AppNavigator = () => (
-  <AppStack.Navigator
-    initialRouteName="Home"
-    screenOptions={{
-      headerStyle: {
-        backgroundColor: COLORS.BACKGROUND_DARK,
-      },
-      headerTintColor: COLORS.TEXT_LIGHT,
-      headerTitleStyle: {
-        fontWeight: 'bold',
-      },
-    }}
-  >
-    <AppStack.Screen
-      name="Home"
-      component={HomeScreen}
-      options={{ headerShown: false }}
-    />
-    <AppStack.Screen 
-      name="Playlists" 
-      component={PlaylistsScreen}
-      options={{ title: 'My Playlists' }}
-    />
-    <AppStack.Screen 
-      name="PlaylistDetail" 
-      component={PlaylistDetailScreen}
-      options={{ title: 'Playlist Details' }}
-    />
-    <AppStack.Screen 
-      name="AddMovie" 
-      component={AddMovieScreen}
-      options={{ title: 'Add Movie to Playlist' }}
-    />
-    <AppStack.Screen 
-      name="EditMovie" 
-      component={EditMovieScreen}
-      options={{ title: 'Update Movie Status' }}
-    />
-  </AppStack.Navigator>
-);
 
 const AppNavigatorWrapper = () => {
   const { userToken } = useAuth();
 
   return (
     <NavigationContainer>
-      {userToken ? <AppNavigator /> : <AuthNavigator />}
+      <Stack.Navigator
+        initialRouteName="Home"
+        screenOptions={{
+          headerStyle: {
+            backgroundColor: COLORS.BACKGROUND_DARK,
+          },
+          headerTintColor: COLORS.TEXT_LIGHT,
+          headerTitleStyle: {
+            fontWeight: 'bold',
+          },
+        }}
+      >
+        {/* Public screens - always available */}
+        <Stack.Screen
+          name="Home"
+          component={HomeScreen}
+          options={{ headerShown: false }}
+        />
+        <Stack.Screen
+          name="Login"
+          component={LoginScreen}
+          options={{ headerShown: false }}
+        />
+        <Stack.Screen
+          name="Register"
+          component={RegisterScreen}
+          options={{ headerShown: false }}
+        />
+
+        {/* Protected screens - only when authenticated */}
+        {userToken && (
+          <>
+            <Stack.Screen 
+              name="Playlists" 
+              component={PlaylistsScreen}
+              options={{ title: 'My Playlists' }}
+            />
+            <Stack.Screen 
+              name="PlaylistDetail" 
+              component={PlaylistDetailScreen}
+              options={{ title: 'Playlist Details' }}
+            />
+            <Stack.Screen 
+              name="AddMovie" 
+              component={AddMovieScreen}
+              options={{ title: 'Add Movie to Playlist' }}
+            />
+            <Stack.Screen 
+              name="EditMovie" 
+              component={EditMovieScreen}
+              options={{ title: 'Update Movie Status' }}
+            />
+          </>
+        )}
+      </Stack.Navigator>
     </NavigationContainer>
   );
 };
