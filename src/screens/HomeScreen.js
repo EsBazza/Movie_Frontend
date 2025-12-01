@@ -60,11 +60,11 @@ const HomeScreen = ({ navigation }) => {
     fetchMovies(1);
   }, [fetchMovies]);
 
-  const loadMore = () => {
+  const loadMore = useCallback(() => {
     if (!loadingMore && hasMore && !loading) {
       fetchMovies(page + 1, true);
     }
-  };
+  }, [loadingMore, hasMore, loading, page, fetchMovies]);
 
   const handleMoviePress = async (movie) => {
     if (!userToken) {
@@ -228,7 +228,7 @@ const HomeScreen = ({ navigation }) => {
           ListHeaderComponent={renderHeader}
           ListFooterComponent={renderFooter}
           onEndReached={loadMore}
-          onEndReachedThreshold={0.5}
+          onEndReachedThreshold={0.8}
           showsVerticalScrollIndicator={false}
         />
       )}
