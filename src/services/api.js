@@ -179,6 +179,8 @@ export const apiEndpoints = {
 
     getPopular: (type = 'movie', page = 1) =>
       api.get('/api/tmdb/popular/', { params: { type, page } }),
+    getTopRated: (type = 'movie', page = 1) =>
+      api.get('/api/tmdb/top-rated/', { params: { type, page } }),
   },
 };
 

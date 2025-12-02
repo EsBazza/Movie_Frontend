@@ -65,10 +65,11 @@ const AppNavigator = () => (
 
 const AppNavigatorWrapper = () => {
   const { userToken } = useAuth();
+  const isAuthenticated = !!userToken || __DEV__;
 
   return (
     <NavigationContainer>
-      {userToken ? <AppNavigator /> : <AuthNavigator />}
+      {isAuthenticated ? <AppNavigator /> : <AuthNavigator />}
     </NavigationContainer>
   );
 };

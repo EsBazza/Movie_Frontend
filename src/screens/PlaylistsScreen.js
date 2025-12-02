@@ -1,16 +1,16 @@
 import React, { useState, useCallback } from 'react';
-import { 
-  View, 
-  Text, 
-  FlatList, 
-  TouchableOpacity, 
-  Alert, 
-  StyleSheet, 
-  ActivityIndicator,
+import {
+  View,
+  Text,
+  FlatList,
+  TouchableOpacity,
+  Alert,
+  StyleSheet,
   Modal,
   TextInput,
+  Dimensions,
+  RefreshControl,
   StatusBar,
-  Dimensions
 } from 'react-native';
 import { useFocusEffect } from '@react-navigation/native';
 import { useAuth } from '../context/AuthContext';
@@ -26,10 +26,13 @@ const PlaylistsScreen = ({ navigation }) => {
   const [newPlaylistName, setNewPlaylistName] = useState('');
   const [newPlaylistDescription, setNewPlaylistDescription] = useState('');
   const [creating, setCreating] = useState(false);
+  const [refreshing, setRefreshing] = useState(false);
   const { signOut } = useAuth();
 
-  const fetchPlaylists = async () => {
-    setLoading(true);
+  const fetchPlaylists = useCallback(async ({ silent = false } = {}) => {
+    if (!silent) {
+      setLoading(true);
+    }
     try {
       const response = await apiEndpoints.playlists.getAll();
       const data = response.data.results || response.data;
@@ -43,14 +46,16 @@ const PlaylistsScreen = ({ navigation }) => {
         Alert.alert("Error", "Could not fetch playlists. Check backend connection.");
       }
     } finally {
-      setLoading(false);
+      if (!silent) {
+        setLoading(false);
+      }
     }
-  };
+  }, [signOut]);
 
   useFocusEffect(
     useCallback(() => {
       fetchPlaylists();
-    }, [])
+    }, [fetchPlaylists])
   );
 
   const handleCreatePlaylist = async () => {
@@ -163,6 +168,12 @@ const PlaylistsScreen = ({ navigation }) => {
     </View>
   );
 
+  const handleRefresh = async () => {
+    setRefreshing(true);
+    await fetchPlaylists({ silent: true });
+    setRefreshing(false);
+  };
+
   const renderHeader = () => (
     <View style={styles.header}>
       <Text style={styles.headerTitle}>My Playlists</Text>
@@ -210,6 +221,13 @@ const PlaylistsScreen = ({ navigation }) => {
         ListHeaderComponent={playlists.length > 0 ? renderHeader : null}
         ListEmptyComponent={renderEmptyState}
         showsVerticalScrollIndicator={false}
+        refreshControl={
+          <RefreshControl
+            refreshing={refreshing}
+            onRefresh={handleRefresh}
+            tintColor={COLORS.PRIMARY_ACCENT}
+          />
+        }
       />
 
       {/* FAB - Only show if there are playlists */}

@@ -1,84 +1,285 @@
-import { StyleSheet } from 'react-native';
+import { StyleSheet, Platform } from 'react-native';
 import { COLORS } from '../constants/Constants';
 
-const CARD_WIDTH = 130;
+const CARD_WIDTH = 150;
 
 export default StyleSheet.create({
-  container: {
+  safeArea: {
     flex: 1,
     backgroundColor: COLORS.BACKGROUND_DARK,
   },
-  navBar: {
+  scrollView: {
+    flex: 1,
+  },
+  scrollContent: {
+    paddingHorizontal: 20,
+    paddingBottom: 140,
+    paddingTop: Platform.select({ ios: 130, android: 110 }),
+  },
+  stickyHeader: {
+    position: 'absolute',
+    top: 0,
+    left: 0,
+    right: 0,
+    zIndex: 20,
     flexDirection: 'row',
     alignItems: 'center',
-    paddingHorizontal: 24,
-    paddingVertical: 16,
-    backgroundColor: '#121214',
+    justifyContent: 'space-between',
+    paddingHorizontal: 20,
+    paddingTop: Platform.select({ ios: 50, android: 30 }),
+    paddingBottom: 12,
+    backgroundColor: 'rgba(0,0,0,0.9)',
+    borderBottomColor: 'rgba(255,255,255,0.08)',
     borderBottomWidth: 1,
-    borderBottomColor: '#1f1f23',
-    gap: 18,
   },
-  brand: {
+  stickyTitle: {
+    color: COLORS.TEXT_LIGHT,
     fontSize: 24,
+    fontWeight: '900',
+    letterSpacing: 2,
+  },
+  stickyNavButton: {
+    color: COLORS.TEXT_MUTED,
+    fontWeight: '600',
+    fontSize: 14,
+  },
+  heroSection: {
+    marginBottom: 24,
+    gap: 10,
+  },
+  heroEyebrow: {
+    color: COLORS.TEXT_MUTED,
+    fontSize: 12,
+    letterSpacing: 2,
+  },
+  heroSpotlight: {
+    height: 320,
+    borderRadius: 24,
+    overflow: 'hidden',
+    backgroundColor: '#111',
+  },
+  heroBackdrop: {
+    flex: 1,
+  },
+  heroOverlay: {
+    flex: 1,
+    justifyContent: 'flex-end',
+    padding: 20,
+    backgroundColor: 'rgba(0,0,0,0.45)',
+  },
+  heroBadge: {
+    color: COLORS.TEXT_LIGHT,
+    fontSize: 12,
+    textTransform: 'uppercase',
+    letterSpacing: 2,
+    marginBottom: 8,
+  },
+  heroTitle: {
+    fontSize: 28,
+    fontWeight: '800',
+    color: COLORS.TEXT_LIGHT,
+    marginBottom: 8,
+  },
+  heroDescription: {
+    color: COLORS.TEXT_MUTED,
+    fontSize: 13,
+    marginBottom: 16,
+  },
+  heroActionRow: {
+    flexDirection: 'row',
+    gap: 12,
+  },
+  heroPrimaryButton: {
+    flex: 1,
+    backgroundColor: COLORS.TEXT_LIGHT,
+    borderRadius: 28,
+    paddingVertical: 12,
+    alignItems: 'center',
+  },
+  heroPrimaryText: {
+    fontWeight: '700',
+    color: COLORS.BACKGROUND_DARK,
+  },
+  heroSecondaryButton: {
+    flex: 1,
+    borderRadius: 28,
+    borderWidth: 1,
+    borderColor: COLORS.TEXT_LIGHT,
+    paddingVertical: 12,
+    alignItems: 'center',
+    backgroundColor: 'rgba(0,0,0,0.35)',
+  },
+  heroSecondaryText: {
+    color: COLORS.TEXT_LIGHT,
+    fontWeight: '600',
+  },
+  heroFallback: {
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  previewShelf: {
+    marginTop: 18,
+  },
+  previewShelfHeader: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    marginBottom: 12,
+  },
+  previewShelfTitle: {
+    fontSize: 16,
     fontWeight: '700',
     color: COLORS.TEXT_LIGHT,
   },
-  brandAccent: {
-    color: COLORS.SUCCESS_GREEN,
+  previewShelfSubtitle: {
+    fontSize: 12,
+    color: COLORS.TEXT_MUTED,
+    marginTop: 2,
   },
-  searchInput: {
-    flex: 1,
-    height: 40,
-    backgroundColor: '#2b2b2f',
-    borderRadius: 8,
-    paddingHorizontal: 14,
+  previewShelfAction: {
+    color: COLORS.PRIMARY_ACCENT,
+    fontWeight: '600',
+    fontSize: 12,
+  },
+  previewShelfList: {
+    paddingVertical: 4,
+  },
+  previewShelfSpacer: {
+    width: 14,
+  },
+  previewCard: {
+    width: 240,
+    backgroundColor: COLORS.CARD_DARK,
+    borderRadius: 18,
+    padding: 16,
+    shadowColor: '#000',
+    shadowOpacity: 0.25,
+    shadowOffset: { width: 0, height: 4 },
+    shadowRadius: 8,
+    elevation: 5,
+  },
+  previewTitle: {
+    fontSize: 16,
+    fontWeight: '700',
     color: COLORS.TEXT_LIGHT,
   },
-  navLinks: {
+  previewSubtitle: {
+    marginTop: 4,
+    color: COLORS.TEXT_MUTED,
+    fontSize: 12,
+  },
+  previewMeta: {
+    marginTop: 8,
+    color: COLORS.TEXT_MUTED,
+    fontSize: 12,
+  },
+  previewProgressBarBackground: {
+    height: 6,
+    borderRadius: 3,
+    backgroundColor: COLORS.BACKGROUND_DARK,
+    marginTop: 12,
+  },
+  previewProgressBarFill: {
+    height: 6,
+    borderRadius: 3,
+    backgroundColor: COLORS.PRIMARY_ACCENT,
+  },
+  previewActionRow: {
     flexDirection: 'row',
-    alignItems: 'center',
-    gap: 16,
+    gap: 12,
   },
-  navLink: {
+  previewPrimaryButton: {
+    flex: 1,
+    backgroundColor: COLORS.PRIMARY_ACCENT,
+    borderRadius: 14,
+    paddingVertical: 12,
+    alignItems: 'center',
+  },
+  previewPrimaryText: {
     color: COLORS.TEXT_LIGHT,
-    fontSize: 15,
+    fontWeight: '600',
+    fontSize: 14,
+  },
+  previewSecondaryButton: {
+    flex: 1,
+    borderRadius: 14,
+    paddingVertical: 12,
+    alignItems: 'center',
+    borderWidth: 1,
+    borderColor: COLORS.PRIMARY_ACCENT + '60',
+  },
+  previewSecondaryText: {
+    color: COLORS.PRIMARY_ACCENT,
+    fontWeight: '600',
+    fontSize: 14,
+  },
+  previewLoadingText: {
+    marginTop: 12,
+    color: COLORS.TEXT_MUTED,
+    textAlign: 'center',
+  },
+  previewErrorText: {
+    color: '#ffb4b4',
+    textAlign: 'center',
+    marginBottom: 12,
+  },
+  previewRetryButton: {
+    alignSelf: 'center',
+    paddingHorizontal: 20,
+    paddingVertical: 8,
+    borderRadius: 20,
+    borderWidth: 1,
+    borderColor: COLORS.PRIMARY_ACCENT,
+  },
+  previewRetryText: {
+    color: COLORS.PRIMARY_ACCENT,
     fontWeight: '600',
   },
-  scrollContent: {
-    paddingHorizontal: 24,
-    paddingVertical: 24,
-  },
   sectionContainer: {
-    marginBottom: 32,
+    marginBottom: 28,
+  },
+  sectionHeader: {
+    flexDirection: 'row',
+    alignItems: 'flex-start',
+    justifyContent: 'space-between',
+    marginBottom: 12,
   },
   sectionTitle: {
     fontSize: 18,
     fontWeight: '700',
     color: COLORS.TEXT_LIGHT,
-    marginBottom: 16,
   },
-  loaderRow: {
+  sectionSubtitle: {
+    fontSize: 13,
+    color: COLORS.TEXT_MUTED,
+    marginTop: 4,
+    maxWidth: 220,
+  },
+  reloadLink: {
+    fontSize: 12,
+    fontWeight: '600',
+    color: COLORS.PRIMARY_ACCENT,
+  },
+  sectionLoader: {
     flexDirection: 'row',
     alignItems: 'center',
-    gap: 12,
+    gap: 10,
   },
   loaderText: {
+    marginLeft: 8,
     color: COLORS.TEXT_MUTED,
-    fontSize: 14,
+    fontSize: 13,
   },
-  cardGrid: {
-    flexDirection: 'row',
-    flexWrap: 'wrap',
-    columnGap: 16,
-    rowGap: 20,
+  sectionList: {
+    paddingVertical: 4,
   },
-  card: {
+  sectionCard: {
     width: CARD_WIDTH,
   },
-  cardImage: {
+  sectionCardImage: {
     width: CARD_WIDTH,
-    height: 180,
-    borderRadius: 8,
+    height: 210,
+    borderRadius: 10,
     marginBottom: 8,
     backgroundColor: '#1e1e22',
   },
@@ -95,15 +296,276 @@ export default StyleSheet.create({
     fontSize: 14,
     fontWeight: '600',
   },
-  errorBanner: {
-    backgroundColor: '#4c1b1b',
-    padding: 12,
-    borderRadius: 10,
-    marginBottom: 20,
+  cardMetaRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    marginTop: 4,
   },
-  errorText: {
+  cardMetaText: {
+    color: COLORS.TEXT_MUTED,
+    fontSize: 11,
+  },
+  addButtonSmall: {
+    paddingVertical: 2,
+    paddingHorizontal: 8,
+    borderRadius: 10,
+    backgroundColor: COLORS.PRIMARY_ACCENT + '20',
+  },
+  addButtonText: {
+    fontSize: 10,
+    color: COLORS.PRIMARY_ACCENT,
+    fontWeight: '600',
+  },
+  sectionSpacer: {
+    width: 12,
+  },
+  sectionErrorBanner: {
+    padding: 12,
+    borderRadius: 14,
+    backgroundColor: '#2b1b1b',
+  },
+  sectionErrorText: {
     color: '#ffb4b4',
-    textAlign: 'center',
     fontSize: 13,
+    textAlign: 'center',
+  },
+  floatingButton: {
+    position: 'absolute',
+    right: 20,
+    bottom: 30,
+    width: 56,
+    height: 56,
+    borderRadius: 28,
+    backgroundColor: COLORS.PRIMARY_ACCENT,
+    justifyContent: 'center',
+    alignItems: 'center',
+    ...Platform.select({
+      ios: {
+        shadowColor: '#000',
+        shadowOpacity: 0.3,
+        shadowOffset: { width: 0, height: 6 },
+        shadowRadius: 8,
+      },
+      android: {
+        elevation: 6,
+      },
+    }),
+  },
+  floatingButtonText: {
+    fontSize: 32,
+    color: COLORS.TEXT_LIGHT,
+    fontWeight: '700',
+  },
+  addModalOverlay: {
+    flex: 1,
+    backgroundColor: 'rgba(0,0,0,0.8)',
+    justifyContent: 'center',
+    padding: 20,
+  },
+  addModalContent: {
+    backgroundColor: COLORS.CARD_DARK,
+    borderRadius: 20,
+    padding: 20,
+  },
+  addModalTitle: {
+    color: COLORS.TEXT_LIGHT,
+    fontSize: 20,
+    fontWeight: '700',
+    textAlign: 'center',
+  },
+  addModalSubtitle: {
+    color: COLORS.TEXT_MUTED,
+    fontSize: 14,
+    textAlign: 'center',
+    marginTop: 6,
+    marginBottom: 16,
+  },
+  addModalList: {
+    maxHeight: 260,
+  },
+  addModalRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    paddingVertical: 12,
+    borderBottomWidth: 1,
+    borderBottomColor: COLORS.BACKGROUND_DARK,
+  },
+  addModalRowTitle: {
+    color: COLORS.TEXT_LIGHT,
+    fontSize: 15,
+    fontWeight: '600',
+  },
+  addModalRowSubtitle: {
+    color: COLORS.TEXT_MUTED,
+    fontSize: 12,
+    marginTop: 2,
+  },
+  addModalRowAction: {
+    color: COLORS.PRIMARY_ACCENT,
+    fontWeight: '700',
+  },
+  addModalEmpty: {
+    color: COLORS.TEXT_MUTED,
+    textAlign: 'center',
+    marginVertical: 20,
+  },
+  addModalCancel: {
+    marginTop: 20,
+    paddingVertical: 12,
+    borderRadius: 12,
+    backgroundColor: COLORS.BACKGROUND_DARK,
+    alignItems: 'center',
+  },
+  addModalCancelText: {
+    color: COLORS.TEXT_MUTED,
+    fontWeight: '600',
+    fontSize: 14,
+  },
+  detailModalOverlay: {
+    flex: 1,
+    backgroundColor: 'rgba(0,0,0,0.95)',
+  },
+  detailModalContent: {
+    flex: 1,
+    margin: 10,
+    borderRadius: 24,
+    backgroundColor: COLORS.BACKGROUND_DARK,
+    overflow: 'hidden',
+  },
+  closeButton: {
+    position: 'absolute',
+    top: 40,
+    right: 22,
+    zIndex: 10,
+    backgroundColor: 'rgba(0,0,0,0.6)',
+    width: 40,
+    height: 40,
+    borderRadius: 20,
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  closeButtonText: {
+    color: COLORS.TEXT_LIGHT,
+    fontSize: 18,
+    fontWeight: '600',
+  },
+  detailScrollContent: {
+    paddingTop: 80,
+    paddingBottom: 40,
+    paddingHorizontal: 20,
+  },
+  detailLoader: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    gap: 10,
+    marginTop: 40,
+  },
+  detailPosterSection: {
+    alignItems: 'center',
+    marginBottom: 22,
+  },
+  detailPoster: {
+    width: 220,
+    height: 320,
+    borderRadius: 16,
+    marginBottom: 16,
+    backgroundColor: '#111',
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 10 },
+    shadowOpacity: 0.6,
+    shadowRadius: 16,
+    elevation: 12,
+  },
+  detailNoPoster: {
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  detailNoPosterText: {
+    fontSize: 48,
+  },
+  playTrailerButton: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    backgroundColor: '#ff0000',
+    paddingHorizontal: 28,
+    paddingVertical: 10,
+    borderRadius: 24,
+    gap: 10,
+  },
+  playButtonIcon: {
+    color: COLORS.TEXT_LIGHT,
+    fontSize: 16,
+  },
+  playButtonText: {
+    color: COLORS.TEXT_LIGHT,
+    fontSize: 14,
+    fontWeight: '600',
+  },
+  detailInfoSection: {
+    paddingBottom: 24,
+  },
+  detailTitle: {
+    fontSize: 26,
+    fontWeight: '700',
+    color: COLORS.TEXT_LIGHT,
+    textAlign: 'center',
+    marginBottom: 12,
+  },
+  detailMetaRow: {
+    flexDirection: 'row',
+    flexWrap: 'wrap',
+    justifyContent: 'center',
+    gap: 8,
+    marginBottom: 16,
+  },
+  metaBadge: {
+    backgroundColor: '#1e1e1e',
+    paddingHorizontal: 12,
+    paddingVertical: 6,
+    borderRadius: 16,
+  },
+  metaBadgeText: {
+    color: COLORS.TEXT_MUTED,
+    fontSize: 12,
+  },
+  detailGenres: {
+    color: COLORS.TEXT_MUTED,
+    fontSize: 13,
+    marginBottom: 12,
+    textAlign: 'center',
+  },
+  detailOverview: {
+    color: COLORS.TEXT_LIGHT,
+    fontSize: 14,
+    lineHeight: 22,
+    textAlign: 'center',
+  },
+  detailActions: {
+    flexDirection: 'row',
+    flexWrap: 'wrap',
+    gap: 12,
+    marginTop: 24,
+    justifyContent: 'center',
+  },
+  detailActionButton: {
+    minWidth: 150,
+    flexGrow: 1,
+    backgroundColor: '#222',
+    borderRadius: 16,
+    paddingVertical: 12,
+    paddingHorizontal: 16,
+    alignItems: 'center',
+  },
+  detailActionText: {
+    color: COLORS.TEXT_LIGHT,
+    fontSize: 13,
+    fontWeight: '600',
+  },
+  youtubeButton: {
+    backgroundColor: '#ff000020',
   },
 });

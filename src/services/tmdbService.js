@@ -120,6 +120,24 @@ class TMDBService {
     }
   }
 
+  async getTopRated(type = 'movie', page = 1) {
+    try {
+      const response = await apiEndpoints.tmdb.getTopRated(type, page);
+      return {
+        success: true,
+        data: response.data,
+        error: null,
+      };
+    } catch (error) {
+      console.error('TMDB Top Rated Error:', error);
+      return {
+        success: false,
+        data: null,
+        error: this.handleError(error),
+      };
+    }
+  }
+
   /**
    * Get or create movie in local database from TMDB ID
    * This implements the "lazy loading" pattern - fetch from TMDB only when needed
